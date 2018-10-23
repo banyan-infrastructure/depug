@@ -13,13 +13,16 @@ let exitProcess err =
     p##abort ()
   end
 
-let escaped str = str
+let escaped =
+  function
+  | None -> ""
+  | Some val_ -> "=" ^ val_
   
 let rec makeAttrs (t : Pug.astTag) =
   match t.attrs with
   | [] -> ""
   | attr :: attrs ->
-     " " ^ attr.name ^ "=" ^ (escaped attr.val_) ^
+     " " ^ attr.name ^ (escaped attr.val_) ^
        (makeAttrs { t with attrs = attrs })
 
 let rec asHtml =

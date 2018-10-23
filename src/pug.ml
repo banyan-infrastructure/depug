@@ -4,7 +4,7 @@ type ast = Js.Json.t
 
 type astAttr =
   { name : string
-  ; val_ : string
+  ; val_ : string option
   ; mustEscape : bool
   }
 
@@ -25,8 +25,8 @@ let decodeAttr attr =
   let name = sel "name" Js.Json.decodeString in
   let val_ = sel "val" Js.Json.decodeString in
   let mustEscape = sel "mustEscape" Js.Json.decodeBoolean in
-  match (name, val_, mustEscape) with
-  | (Some name, Some val_, Some mustEscape) ->
+  match (name, mustEscape) with
+  | (Some name, Some mustEscape) ->
      Some { name = name ; val_ = val_ ; mustEscape = mustEscape }
   | _ -> None
          
