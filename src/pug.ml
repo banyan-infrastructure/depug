@@ -51,6 +51,40 @@ let rec decodeAstNode ast =
     |> List.map listSingleton
     |> List.concat
   in
+  let concatClasses =
+    Util.fold_left
+      (fun str c ->
+        if str <> "" then
+          str ^ " " ^ (Sq.strip c)
+        else
+          Sq.strip c
+      )
+      ""
+  in
+  let combineClasses alist =
+    let (clist,alist) =
+      Util.fold_left
+        (fun (clist,alist) attr ->
+          if attr.name == "class" then
+            match attr.val_ with
+            | Some v -> 
+               (v :: clist, alist)
+            | None ->
+               (clist, alist)
+          else
+            (clist, attr :: alist)
+        )
+        ([], [])
+        alist
+    in
+    match clist with
+    | [] -> alist
+    | _ ->
+       { name = "class"
+       ; val_ = Some ("'" ^ (concatClasses clist) ^ "'")
+       ; mustEscape = true
+       } :: alist
+  in
   let block = sel "block" decodeAstNode in
   let attrBlocks = sel "attributeBlocks" (fun x -> Some x) in
   match   (type_ , name     , selfClosing     , block     ) with
@@ -61,7 +95,7 @@ let rec decodeAstNode ast =
        (Tag
           { name = name
           ; selfClosing = selfClosing
-          ; attrs = attrs
+          ; attrs = combineClasses attrs
           ; block = block
           ; attributeBlocks = []
           }
