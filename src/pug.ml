@@ -18,7 +18,8 @@ and astTag =
          
 and astNode =
   | Block of astNode list
-  | Tag of astTag 
+  | Tag of astTag
+  | Text of string
 
 let decodeAttr attr =
   let sel path dec = Xsel.xsel path dec attr in
@@ -34,6 +35,7 @@ let rec decodeAstNode ast =
   let sel path dec = Xsel.xsel path dec ast in
   let type_ = sel "type" Js.Json.decodeString in
   let name = sel "name" Js.Json.decodeString in
+  let val_ = sel "val" Js.Json.decodeString in
   let selfClosing = sel "selfClosing" Js.Json.decodeBoolean in
   let nodes =
     sel "nodes" Js.Json.decodeArray
@@ -100,6 +102,8 @@ let rec decodeAstNode ast =
           ; attributeBlocks = []
           }
        )
+  | (Some "Text" , _        , _               , _         ) ->
+     Some (Text (val_ |> optionDefault ""))
   | _ -> None
          
 let parse : string -> ast =

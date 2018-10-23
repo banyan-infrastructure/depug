@@ -28,6 +28,7 @@ let rec makeAttrs (t : Pug.astTag) =
 let rec asHtml =
   let continueTag (t : Pug.astTag) =
     match t.block with
+    | Text t -> ""
     | Block [] ->
        if t.selfClosing then
          "/>"
@@ -47,6 +48,7 @@ let rec asHtml =
        ">" ^ (asHtml (Tag t)) ^ "</" ^ t.name ^ ">"
   in
   function
+  | Text t -> t
   | Tag t ->
      "<" ^ t.name ^ (makeAttrs t) ^ (continueTag t)
   | Block l ->
